@@ -408,7 +408,7 @@
 
         .detail-value {
             flex: 1;
-            color: #6b7280;
+            color: white;
             word-break: break-word;
         }
 
@@ -1136,7 +1136,7 @@
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">是否慈善:</div>
-                        <div class="detail-value">${activity.charitable === 'true' ? '是' : '否'}</div>
+                        <div class="detail-value flag-${activity.charitable === 'true' ? "" : "non"}charity">${activity.charitable === 'true' ? '是' : '否'}</div>
                     </div>
                     ${activity.remarks && activity.remarks.length > 0 ? `
                     <div class="detail-row">
