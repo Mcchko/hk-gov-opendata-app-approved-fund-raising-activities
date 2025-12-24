@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>獲批准的籌款活動查詢系統</title>
+    <style>
+        .element-hidden {
+            display: none !important;
+        }
+
+        .flag-charity {
+            background-color: green;
+            width: fit-content;
+            padding: 3px 10px 3px 10px;
+            border-radius: 10px;
+        }
+
+        .flag-noncharity {
+            background-color: red;
+            width: fit-content;
+            padding: 3px 10px 3px 10px;
+            border-radius: 10px;
+        }
+
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            min-height: 100vh;
+            padding: 16px;
+            color: #1f2937;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: #111827;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+        }
+
+        .data-section {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+
+        /* Data Section Styles */
+        .data-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .data-header h2 {
+            color: #111827;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .data-header .subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .data-stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4f46e5;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .accordion-container {
+            margin-top: 20px;
+        }
+
+        .department-group {
+            margin-bottom: 16px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .department-header {
+            background: #4f46e5;
+            color: white;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .department-header i {
+            transition: transform 0.3s ease;
+        }
+
+        .department-content {
+            background: #f8fafc;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .department-content.expanded {
+            max-height: 5000px;
+            padding: 15px;
+        }
+
+        .activity-group {
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .activity-header {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .activity-content {
+            background: white;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .activity-content.expanded {
+            max-height: 5000px;
+            padding: 15px;
+        }
+
+        .permit-group {
+            margin-bottom: 10px;
+            border-left: 3px solid #10b981;
+            background: #f0fdf4;
+        }
+
+        .permit-header {
+            background: #10b981;
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .permit-content {
+            background: white;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .permit-content.expanded {
+            max-height: 5000px;
+            padding: 15px;
+        }
+
+        .organisation-group {
+            margin-bottom: 8px;
+            border: 1px solid #f3f4f6;
+            border-radius: 4px;
+        }
+
+        .organisation-header {
+            background: #f59e0b;
+            color: white;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .organisation-content {
+            background: #fef3c7;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .organisation-content.expanded {
+            max-height: 5000px;
+            padding: 12px;
+        }
+
+        .district-group {
+            margin-bottom: 6px;
+        }
+
+        .district-header {
+            background: #8b5cf6;
+            color: white;
+            padding: 6px 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .district-content {
+            background: #faf5ff;
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .district-content.expanded {
+            max-height: 5000px;
+            padding: 10px;
+        }
+
+        .activity-details {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+            width: 200px;
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            flex: 1;
+            color: #6b7280;
+            word-break: break-word;
+        }
+
+        .schedule-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .schedule-item {
+            background: #f8fafc;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            border-left: 3px solid #4f46e5;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            padding: 8px 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:disabled {
+            background: #c7d2fe;
+            cursor: not-allowed;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .page-info {
+            font-weight: 600;
+            color: #374151;
+            margin: 0 10px;
+        }
+
+        .page-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 10px;
+        }
+
+        .page-input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .page-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .cache-info {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #6b7280;
+            text-align: center;
+            padding: 5px;
+            background: #f0f9ff;
+            border-radius: 4px;
+            border: 1px solid #bae6fd;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .notification.warning {
+            background: #f59e0b;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.875rem;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+                background: #4f46e5;
+            }
+
+            .container {
+                gap: 16px;
+            }
+
+            .header {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .data-section {
+                max-height: 500px;
+                padding: 15px;
+            }
+
+            .detail-row {
+                flex-direction: column;
+            }
+
+            .detail-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .page-input-group {
+                margin: 10px 0;
+            }
+        }
+
+        /* Smooth Transitions */
+        * {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>獲批准的籌款活動查詢系統</h1>
+            <p class="subtitle">查閱香港社會福利署批准的各類公開籌款活動資訊</p>
+        </header>
+
+        <section class="filter-section">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="fromDate">開始日期</label>
+                    <input type="date" id="fromDate" value="2024-01-01">
+                </div>
+                <div class="filter-group">
+                    <label for="toDate">結束日期</label>
+                    <input type="date" id="toDate" value="2024-12-31">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-secondary" onclick="resetFilters()">重設</button>
+                <button class="btn btn-primary" onclick="loadFundraisingData()">查詢籌款活動</button>
+            </div>
+        </section>
+
+        <main class="main-content">
+            <section class="data-section">
+                <div class="data-header">
+                    <h2>籌款活動列表</h2>
+                    <p class="subtitle">點擊部門/活動名稱查看更多詳細資訊</p>
+                </div>
+                <div class="data-stats">
+                    <div class="stat-item">
+                        <span id="total-activities" class="stat-value">0</span>
+                        <span class="stat-label">活動總數</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="total-departments" class="stat-value">0</span>
+                        <span class="stat-label">批准部門</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="total-organisations" class="stat-value">0</span>
+                        <span class="stat-label">組織機構</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="total-districts" class="stat-value">0</span>
+                        <span class="stat-label">地區數目</span>
+                    </div>
+                </div>
+                <div id="cache-info" class="cache-info element-hidden"></div>
+                <div class="accordion-container" id="accordion-container">
+                    <div class="no-data">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <p>請設定篩選條件並查詢籌款活動</p>
+                    </div>
+                </div>
+                <div class="pagination element-hidden" id="pagination">
+                    <button class="page-btn" onclick="changePage(-1)" id="prevPage">上一頁</button>
+                    <span class="page-info" id="pageInfo">第 1 頁</span>
+                    <div class="page-input-group">
+                        <input type="number" class="page-input" id="pageInput" min="1" value="1">
+                        <button class="page-btn" onclick="goToPage()">前往</button>
+                    </div>
+                    <span class="page-info" id="totalPagesInfo">共 0 頁</span>
+                    <button class="page-btn" onclick="changePage(1)" id="nextPage">下一頁</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>獲批准的籌款活動查詢系統 | 資料來源: 香港政府籌款活動查詢服務 | 最後更新: 2024年</p>
+        </footer>
+    </div>
+
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js"></script>
+
+    <script>
+        // 全局變量
+        let currentPage = 1;
+        let totalPages = 1;
+        let allActivities = [];
+        let groupedData = {};
+
+        // 數據緩存系統
+        const dataCache = {
+            cache: new Map(),
+
+            // 生成緩存鍵
+            generateKey(fromDate, toDate, page) {
+                return `${fromDate}_${toDate}_${page}`;
+            },
+
+            // 獲取緩存數據
+            get(fromDate, toDate, page) {
+                const key = this.generateKey(fromDate, toDate, page);
+                const cached = this.cache.get(key);
+                if (cached && Date.now() - cached.timestamp < 300000) { // 5分鐘緩存
+                    return cached.data;
+                }
+                return null;
+            },
+
+            // 設置緩存數據
+            set(fromDate, toDate, page, data) {
+                const key = this.generateKey(fromDate, toDate, page);
+                this.cache.set(key, {
+                    data: data,
+                    timestamp: Date.now()
+                });
+
+                // 更新緩存信息顯示
+                this.updateCacheInfo();
+            },
+
+            // 清除過期緩存
+            clearExpired() {
+                const now = Date.now();
+                for (const [key, value] of this.cache.entries()) {
+                    if (now - value.timestamp > 300000) { // 5分鐘
+                        this.cache.delete(key);
+                    }
+                }
+                this.updateCacheInfo();
+            },
+
+            // 更新緩存信息顯示
+            updateCacheInfo() {
+                const cacheInfo = document.getElementById('cache-info');
+                if (this.cache.size > 0) {
+                    cacheInfo.textContent = `已緩存 ${this.cache.size} 頁數據`;
+                    cacheInfo.classList.remove('element-hidden');
+                } else {
+                    cacheInfo.classList.add('element-hidden');
+                }
+            },
+
+            // 清除所有緩存
+            clearAll() {
+                this.cache.clear();
+                this.updateCacheInfo();
+            }
+        };
+
+        // 設置默認日期
+        document.addEventListener('DOMContentLoaded', function () {
+            const today = new Date();
+            const nextYear = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+
+            document.getElementById('toDate').value = formatDate(nextYear);
+            document.getElementById('fromDate').value = formatDate(today);
+
+            loadFundraisingData();
+
+            // 每分鐘清理一次過期緩存
+            setInterval(() => dataCache.clearExpired(), 60000);
+        });
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function resetFilters() {
+            const today = new Date();
+            const nextYear = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+
+            document.getElementById('fromDate').value = formatDate(today);
+            document.getElementById('toDate').value = formatDate(nextYear);
+
+            currentPage = 1;
+            allActivities = [];
+            groupedData = {};
+
+            document.getElementById('accordion-container').innerHTML = `
+                <div class="no-data">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <p>請設定篩選條件並查詢籌款活動</p>
+                </div>
+            `;
+            document.getElementById('pagination').classList.add('element-hidden');
+            updateStatistics();
+        }
+
+        async function loadFundraisingData() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            currentPage = 1;
+
+            if (!fromDate || !toDate) {
+                showNotification('請選擇開始日期和結束日期', 'error');
+                return;
+            }
+
+            if (new Date(fromDate) > new Date(toDate)) {
+                showNotification('開始日期不能晚於結束日期', 'error');
+                return;
+            }
+
+            await fetchData(fromDate, toDate, currentPage);
+        }
+
+        async function fetchData(fromDate, toDate, page) {
+            // 首先檢查緩存
+            const cachedData = dataCache.get(fromDate, toDate, page);
+            if (cachedData) {
+                showNotification(`從緩存加載第 ${page} 頁數據`, 'warning');
+                processApiResponse(cachedData, fromDate, toDate, page);
+                return;
+            }
+
+            const container = document.getElementById('accordion-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在加載籌款活動資料...</p>
+                </div>
+            `;
+
+            try {
+                // API 固定使用每頁100個項目
+                const apiUrl = `https://fundraising.one.gov.hk/fundraise_query/webservice/psi/json?fromdate=${fromDate}&todate=${toDate}&itemperpage=100&page=${page}`;
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // 緩存數據
+                dataCache.set(fromDate, toDate, page, data);
+
+                processApiResponse(data, fromDate, toDate, page);
+
+            } catch (error) {
+                console.error('加載數據時出錯:', error);
+                container.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>無法加載數據，請稍後再試</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                    </div>
+                `;
+                document.getElementById('pagination').classList.add('element-hidden');
+            }
+        }
+
+        function processApiResponse(data, fromDate, toDate, page) {
+            if (data.activities && data.activities.length > 0) {
+                allActivities = data.activities;
+                processActivities(allActivities);
+                updateStatistics();
+                renderAccordion();
+                updatePagination(data, fromDate, toDate, page);
+                showNotification(`成功加載第 ${page} 頁數據`, 'success');
+            } else {
+                document.getElementById('accordion-container').innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-search"></i>
+                        <p>在指定日期範圍內未找到籌款活動</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">請嘗試調整日期範圍</p>
+                    </div>
+                `;
+                document.getElementById('pagination').classList.add('element-hidden');
+                updateStatistics();
+            }
+        }
+
+        function processActivities(activities) {
+            groupedData = {};
+
+            activities.forEach((activity, index) => {
+                const department = activity.departmentNameTChinese || '未分類部門';
+                const activityName = activity.activityNameTChinese || '未命名活動';
+                const permitType = activity.licencePermitTypeTChinese || '未指定許可證類型';
+                const organisation = activity.organisationNameTChinese || '未命名組織';
+                const district = activity.districtNameTChinese || '未指定地區';
+
+                // 建立分層結構
+                if (!groupedData[department]) {
+                    groupedData[department] = {};
+                }
+
+                if (!groupedData[department][activityName]) {
+                    groupedData[department][activityName] = {};
+                }
+
+                if (!groupedData[department][activityName][permitType]) {
+                    groupedData[department][activityName][permitType] = {};
+                }
+
+                if (!groupedData[department][activityName][permitType][organisation]) {
+                    groupedData[department][activityName][permitType][organisation] = {};
+                }
+
+                if (!groupedData[department][activityName][permitType][organisation][district]) {
+                    groupedData[department][activityName][permitType][organisation][district] = [];
+                }
+
+                groupedData[department][activityName][permitType][organisation][district].push({
+                    ...activity,
+                    id: `${currentPage}-${index}`
+                });
+            });
+        }
+
+        function updateStatistics() {
+            const totalActivities = allActivities.length;
+            const departments = new Set();
+            const organisations = new Set();
+            const districts = new Set();
+
+            allActivities.forEach(activity => {
+                if (activity.departmentNameTChinese) departments.add(activity.departmentNameTChinese);
+                if (activity.organisationNameTChinese) organisations.add(activity.organisationNameTChinese);
+                if (activity.districtNameTChinese) districts.add(activity.districtNameTChinese);
+            });
+
+            document.getElementById('total-activities').textContent = totalActivities;
+            document.getElementById('total-departments').textContent = departments.size;
+            document.getElementById('total-organisations').textContent = organisations.size;
+            document.getElementById('total-districts').textContent = districts.size;
+        }
+
+        function renderAccordion() {
+            const container = document.getElementById('accordion-container');
+            let html = '';
+
+            Object.keys(groupedData).forEach((department, deptIndex) => {
+                const departmentActivities = groupedData[department];
+                const departmentCount = countActivitiesInDepartment(departmentActivities);
+
+                html += `
+                    <div class="department-group">
+                        <div class="department-header" onclick="toggleGroup('department-${currentPage}-${deptIndex}')">
+                            <div>
+                                <i class="fas fa-building" style="margin-right: 10px;"></i>
+                                ${department} (${departmentCount}個活動)
+                            </div>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div id="department-${currentPage}-${deptIndex}" class="department-content">
+                `;
+
+                Object.keys(departmentActivities).forEach((activityName, actIndex) => {
+                    const activityData = departmentActivities[activityName];
+                    const activityCount = countActivitiesInActivity(activityData);
+
+                    html += `
+                        <div class="activity-group">
+                            <div class="activity-header" onclick="toggleGroup('activity-${currentPage}-${deptIndex}-${actIndex}')">
+                                <div>
+                                    <i class="fas fa-hand-holding-heart" style="margin-right: 10px;"></i>
+                                    ${activityName} (${activityCount}個)
+                                </div>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div id="activity-${currentPage}-${deptIndex}-${actIndex}" class="activity-content">
+                    `;
+
+                    Object.keys(activityData).forEach((permitType, permIndex) => {
+                        const permitData = activityData[permitType];
+                        const permitCount = countActivitiesInPermit(permitData);
+
+                        html += `
+                            <div class="permit-group">
+                                <div class="permit-header" onclick="toggleGroup('permit-${currentPage}-${deptIndex}-${actIndex}-${permIndex}')">
+                                    <div>
+                                        <i class="fas fa-file-certificate" style="margin-right: 10px;"></i>
+                                        ${permitType} (${permitCount}個)
+                                    </div>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div id="permit-${currentPage}-${deptIndex}-${actIndex}-${permIndex}" class="permit-content">
+                        `;
+
+                        Object.keys(permitData).forEach((organisation, orgIndex) => {
+                            const orgData = permitData[organisation];
+                            const orgCount = countActivitiesInOrganisation(orgData);
+
+                            html += `
+                                <div class="organisation-group">
+                                    <div class="organisation-header" onclick="toggleGroup('org-${currentPage}-${deptIndex}-${actIndex}-${permIndex}-${orgIndex}')">
+                                        <div>
+                                            <i class="fas fa-users" style="margin-right: 10px;"></i>
+                                            ${organisation} (${orgCount}個)
+                                        </div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="org-${currentPage}-${deptIndex}-${actIndex}-${permIndex}-${orgIndex}" class="organisation-content">
+                            `;
+
+                            Object.keys(orgData).forEach((district, distIndex) => {
+                                const districtActivities = orgData[district];
+
+                                html += `
+                                    <div class="district-group">
+                                        <div class="district-header" onclick="toggleGroup('dist-${currentPage}-${deptIndex}-${actIndex}-${permIndex}-${orgIndex}-${distIndex}')">
+                                            <div>
+                                                <i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i>
+                                                ${district} (${districtActivities.length}個)
+                                            </div>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div id="dist-${currentPage}-${deptIndex}-${actIndex}-${permIndex}-${orgIndex}-${distIndex}" class="district-content">
+                                `;
+
+                                districtActivities.forEach((activity, actDetailIndex) => {
+                                    html += renderActivityDetails(activity, actDetailIndex);
+                                });
+
+                                html += `
+                                        </div>
+                                    </div>
+                                `;
+                            });
+
+                            html += `
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        html += `
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('pagination').classList.remove('element-hidden');
+        }
+
+        function renderActivityDetails(activity, index) {
+            const scheduleHtml = activity.schedule && activity.schedule.length > 0
+                ? `<ul class="schedule-list">${activity.schedule.map(s =>
+                    `<li class="schedule-item">${s.dateFrom} 至 ${s.dateTo} (${s.timeFrom} - ${s.timeTo})</li>`
+                ).join('')}</ul>`
+                : '未指定';
+
+            return `
+                <div class="activity-details" id="activity-detail-${activity.id}">
+                    <div class="detail-row">
+                        <div class="detail-label">許可證號碼:</div>
+                        <div class="detail-value">${activity.permitNumber || '未提供'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">舉辦地點:</div>
+                        <div class="detail-value">${activity.locationNameTChinese || '未指定'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">活動時間:</div>
+                        <div class="detail-value">${scheduleHtml}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">查詢電話:</div>
+                        <div class="detail-value">${activity.enquiryContact || '未提供'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">英文名稱:</div>
+                        <div class="detail-value">${activity.activityNameEnglish || '未提供'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">是否慈善:</div>
+                        <div class="detail-value">${activity.charitable === 'true' ? '是' : '否'}</div>
+                    </div>
+                    ${activity.remarks && activity.remarks.length > 0 ? `
+                    <div class="detail-row">
+                        <div class="detail-label">備註:</div>
+                        <div class="detail-value">${activity.remarks.join(', ')}</div>
+                    </div>
+                    ` : ''}
+                    ${activity.supplementaryInfoTChinese ? `
+                    <div class="detail-row">
+                        <div class="detail-label">補充資料:</div>
+                        <div class="detail-value">${activity.supplementaryInfoTChinese}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function toggleGroup(groupId) {
+            const element = document.getElementById(groupId);
+            const icon = element.previousElementSibling.querySelector('.fa-chevron-down');
+
+            if (element.classList.contains('expanded')) {
+                element.classList.remove('expanded');
+                icon.className = 'fas fa-chevron-down';
+            } else {
+                element.classList.add('expanded');
+                icon.className = 'fas fa-chevron-up';
+            }
+        }
+
+        function countActivitiesInDepartment(departmentData) {
+            let count = 0;
+            Object.values(departmentData).forEach(activityData => {
+                count += countActivitiesInActivity(activityData);
+            });
+            return count;
+        }
+
+        function countActivitiesInActivity(activityData) {
+            let count = 0;
+            Object.values(activityData).forEach(permitData => {
+                count += countActivitiesInPermit(permitData);
+            });
+            return count;
+        }
+
+        function countActivitiesInPermit(permitData) {
+            let count = 0;
+            Object.values(permitData).forEach(orgData => {
+                count += countActivitiesInOrganisation(orgData);
+            });
+            return count;
+        }
+
+        function countActivitiesInOrganisation(orgData) {
+            let count = 0;
+            Object.values(orgData).forEach(districtActivities => {
+                count += districtActivities.length;
+            });
+            return count;
+        }
+
+        function updatePagination(data, fromDate, toDate, page) {
+            const totalRecords = parseInt(data.totalRecordsSearched || '0');
+            // API 固定每頁100個項目
+            totalPages = Math.ceil(totalRecords / 100);
+
+            document.getElementById('pageInfo').textContent = `第 ${page} 頁`;
+            document.getElementById('totalPagesInfo').textContent = `共 ${totalPages} 頁`;
+            document.getElementById('pageInput').value = page;
+            document.getElementById('prevPage').disabled = page <= 1;
+            document.getElementById('nextPage').disabled = page >= totalPages;
+
+            // 預加載下一頁（如果存在）
+            if (page < totalPages) {
+                const nextPage = page + 1;
+                const cached = dataCache.get(fromDate, toDate, nextPage);
+                if (!cached) {
+                    // 背景預加載
+                    fetch(`https://fundraising.one.gov.hk/fundraise_query/webservice/psi/json?fromdate=${fromDate}&todate=${toDate}&itemperpage=100&page=${nextPage}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            dataCache.set(fromDate, toDate, nextPage, data);
+                        })
+                        .catch(error => console.error('預加載失敗:', error));
+                }
+            }
+        }
+
+        function changePage(delta) {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            const newPage = currentPage + delta;
+
+            if (newPage < 1 || newPage > totalPages) {
+                return;
+            }
+
+            currentPage = newPage;
+            fetchData(fromDate, toDate, currentPage);
+        }
+
+        function goToPage() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+            const pageInput = document.getElementById('pageInput');
+            let targetPage = parseInt(pageInput.value);
+
+            if (isNaN(targetPage) || targetPage < 1) {
+                targetPage = 1;
+            } else if (targetPage > totalPages) {
+                targetPage = totalPages;
+            }
+
+            if (targetPage === currentPage) {
+                return;
+            }
+
+            currentPage = targetPage;
+            fetchData(fromDate, toDate, currentPage);
+        }
+
+        function showNotification(message, type = 'success') {
+            // 移除現有通知
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // 創建通知元素
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' :
+                    type === 'error' ? 'exclamation-circle' :
+                        'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+
+            // 添加到文檔
+            document.body.appendChild(notification);
+
+            // 3秒後移除
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
