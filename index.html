@@ -884,6 +884,14 @@
                 const response = await fetch(apiUrl);
 
                 if (!response.ok) {
+                    container.innerHTML = `
+                        <div class="no-data">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>請先訪問 <a href="${PROXY_URL}" target="_blank">${PROXY_URL}</a></p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">點擊「Request temporary access to the demo server」按鈕啟用代理伺服器</p>
+                        </div>
+                    `;
+                    showNotification('請啟用 CORS Anywhere 代理伺服器', 'error');
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
@@ -899,10 +907,11 @@
                 container.innerHTML = `
                     <div class="no-data">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <p>無法加載數據，請稍後再試</p>
-                        <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                        <p>請先訪問 <a href="${PROXY_URL}" target="_blank">${PROXY_URL}</a></p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">點擊「Request temporary access to the demo server」按鈕啟用代理伺服器</p>
                     </div>
                 `;
+                showNotification('請啟用 CORS Anywhere 代理伺服器', 'error');
                 document.getElementById('pagination').classList.add('element-hidden');
             }
         }
